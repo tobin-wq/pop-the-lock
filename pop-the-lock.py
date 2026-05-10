@@ -423,7 +423,7 @@ def difficulty_menu(stdscr, high_score):
         center_text(
             stdscr,
             h - 2,
-            "ENTER or SPACE = start   ESC = quit",
+            "ENTER = start   ESC = quit",
             curses.A_BOLD,
         )
         stdscr.refresh()
@@ -433,7 +433,7 @@ def difficulty_menu(stdscr, high_score):
             selected = (selected - 1) % len(DIFFICULTIES)
         elif ch == curses.KEY_DOWN:
             selected = (selected + 1) % len(DIFFICULTIES)
-        elif ch in (10, 13, curses.KEY_ENTER, ord(" ")):
+        elif ch in (10, 13, curses.KEY_ENTER):
             return DIFFICULTIES[selected][1]
         elif ch == 27:  # ESC
             raise SystemExit(0)
