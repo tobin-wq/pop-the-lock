@@ -17,3 +17,4 @@ For Windows PowerShell paste into a PowerShell window:
 ```
 irm https://raw.githubusercontent.com/tobin-wq/pop-the-lock/main/install.ps1 | iex
 ```
+Command Prompt, PowerShell, and Windows Terminal will all be able to run the command, but Terminal will work the best.
