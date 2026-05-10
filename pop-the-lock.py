@@ -4,6 +4,7 @@ import curses
 import math
 import os
 import random
+import sys
 import time
 
 HIGH_SCORE_FILE = os.path.expanduser("~/.pop_the_lock_high_score")
@@ -426,6 +427,11 @@ def difficulty_menu(stdscr, high_score):
         elif ch == curses.KEY_DOWN:
             selected = (selected + 1) % len(DIFFICULTIES)
         elif ch in (10, 13, curses.KEY_ENTER, ord(" ")):
+            # Resize the terminal window to fit the lock art (xterm escape).
+            sys.stdout.write("\033[8;66;101t")
+            sys.stdout.flush()
+            curses.napms(120)
+            curses.resize_term(66, 101)
             return DIFFICULTIES[selected][1]
         elif ch == 27:  # ESC
             raise SystemExit(0)
