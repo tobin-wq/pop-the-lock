@@ -317,85 +317,53 @@ DIFFICULTIES = [
 def difficulty_menu(stdscr, high_score):
     """Show the title + difficulty menu. Returns the chosen goal (peg count)."""
     selected = 1  # default to Normal
-
-    # Enable mouse clicks. (We deliberately skip motion-reporting escape codes
-    # because some terminals send them back to us as raw bytes that look like
-    # ESC, which would kick the player out of the menu.)
-    try:
-        curses.mousemask(curses.ALL_MOUSE_EVENTS)
-    except (AttributeError, curses.error):
-        pass
-
     stdscr.nodelay(False)
 
     while True:
-            stdscr.erase()
-            h, w = stdscr.getmaxyx()
-            draw_lock(stdscr, h, w)
-            center_text(stdscr, 1, "*** POP THE LOCK ***", curses.A_BOLD)
-            center_text(stdscr, 3, "Choose a difficulty", curses.A_BOLD)
+        stdscr.erase()
+        h, w = stdscr.getmaxyx()
+        draw_lock(stdscr, h, w)
+        center_text(stdscr, 1, "*** POP THE LOCK ***", curses.A_BOLD)
+        center_text(stdscr, 3, "Choose a difficulty", curses.A_BOLD)
 
-            # Lay out the three options vertically, centered.
-            base_row = h // 2 - 2
-            option_boxes = []  # (row, x_start, x_end_inclusive, index)
-            for i, (name, goal) in enumerate(DIFFICULTIES):
-                row = base_row + i * 2
-                if i == selected:
-                    # Hovered version is "bigger": spaced uppercase + arrows
-                    # + bold/reverse, which makes it visibly wider.
-                    spaced = " ".join(name.upper())
-                    text = f">>  {spaced}   ({goal} LEVELS)  <<"
-                    attr = curses.A_BOLD | curses.A_REVERSE
-                else:
-                    text = f"   {name}  ({goal} levels)   "
-                    attr = curses.A_BOLD
-                x = max(0, (w - len(text)) // 2)
-                try:
-                    stdscr.addnstr(row, x, text, w - 1, attr)
-                except curses.error:
-                    pass
-                option_boxes.append((row, x, x + len(text) - 1, i))
+        # Lay out the three options vertically, centered.
+        base_row = h // 2 - 2
+        for i, (name, goal) in enumerate(DIFFICULTIES):
+            row = base_row + i * 2
+            if i == selected:
+                # Selected option is "bigger": spaced uppercase + arrows +
+                # bold/reverse, which makes it visibly wider.
+                spaced = " ".join(name.upper())
+                text = f">>  {spaced}   ({goal} LEVELS)  <<"
+                attr = curses.A_BOLD | curses.A_REVERSE
+            else:
+                text = f"   {name}  ({goal} levels)   "
+                attr = curses.A_BOLD
+            x = max(0, (w - len(text)) // 2)
+            try:
+                stdscr.addnstr(row, x, text, w - 1, attr)
+            except curses.error:
+                pass
 
-            center_text(stdscr, h - 4, f"High Score: {high_score}")
-            center_text(
-                stdscr,
-                h - 3,
-                "Hover with mouse or use UP/DOWN arrows",
-            )
-            center_text(
-                stdscr,
-                h - 2,
-                "Click or press ENTER to start   ESC = quit",
-                curses.A_BOLD,
-            )
-            stdscr.refresh()
+        center_text(stdscr, h - 4, f"High Score: {high_score}")
+        center_text(stdscr, h - 3, "UP/DOWN arrows to choose")
+        center_text(
+            stdscr,
+            h - 2,
+            "ENTER or SPACE = start   ESC = quit",
+            curses.A_BOLD,
+        )
+        stdscr.refresh()
 
-            ch = stdscr.getch()
-            if ch == curses.KEY_UP:
-                selected = (selected - 1) % len(DIFFICULTIES)
-            elif ch == curses.KEY_DOWN:
-                selected = (selected + 1) % len(DIFFICULTIES)
-            elif ch in (10, 13, curses.KEY_ENTER, ord(" ")):
-                return DIFFICULTIES[selected][1]
-            elif ch == 27:  # ESC
-                raise SystemExit(0)
-            elif ch == curses.KEY_MOUSE:
-                try:
-                    _, mx, my, _, bstate = curses.getmouse()
-                except curses.error:
-                    continue
-                # Update hover based on mouse position.
-                for row, xs, xe, idx in option_boxes:
-                    if my == row and xs <= mx <= xe:
-                        selected = idx
-                        # If the user clicked, start that mode.
-                        if bstate & (
-                            curses.BUTTON1_CLICKED
-                            | curses.BUTTON1_PRESSED
-                            | curses.BUTTON1_RELEASED
-                        ):
-                            return DIFFICULTIES[idx][1]
-                        break
+        ch = stdscr.getch()
+        if ch == curses.KEY_UP:
+            selected = (selected - 1) % len(DIFFICULTIES)
+        elif ch == curses.KEY_DOWN:
+            selected = (selected + 1) % len(DIFFICULTIES)
+        elif ch in (10, 13, curses.KEY_ENTER, ord(" ")):
+            return DIFFICULTIES[selected][1]
+        elif ch == 27:  # ESC
+            raise SystemExit(0)
 
 
 def win_screen(stdscr, goal, high_score):
