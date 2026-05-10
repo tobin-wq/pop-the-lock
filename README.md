@@ -1,7 +1,7 @@
 # Pop the Lock
 Credit to Bay Tek Entertainment for creating Pop the Lock.
 
-Make sure you're on a mac, as this game runs on terminal.
+Make sure you're on a mac, as it runs on terminal.
 
 You're gonna have to resize the terminal window to fit the ascii into it.
 
