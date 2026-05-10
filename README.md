@@ -1,11 +1,11 @@
 # Pop the Lock
+A terminal version of the classic Pop the Lock game
+
 Credit to Bay Tek Entertainment for creating Pop the Lock.
 
-Make sure you're on a mac, as it runs on terminal.
+Make sure to resize the terminal window to fit the ascii.
 
-You're gonna have to resize the terminal window to fit the ascii into it.
-
-To run it, copy and paste the code below into your terminal:
+To run it, copy and paste the code below into terminal:
 ```
 curl -sSL https://raw.githubusercontent.com/tobin-wq/pop-the-lock/main/install.sh | bash
 ```
