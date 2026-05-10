@@ -411,7 +411,7 @@ def play_level(stdscr, level, pegs_remaining, direction, ring, high_score, start
 
         # HUD: high score on the left, controls hint on the right.
         hud_left = f" High: {high_score} "
-        hud_right = " SPACE=lock  ESC=quit "
+        hud_right = " SPACE=lock  P=pause  ESC=quit "
         try:
             stdscr.addnstr(0, 0, hud_left, w - 1, curses.A_BOLD)
             stdscr.addnstr(0, max(0, w - len(hud_right) - 1), hud_right, w - 1)
@@ -438,6 +438,20 @@ def play_level(stdscr, level, pegs_remaining, direction, ring, high_score, start
             return in_zone(ball_idx), ball_idx
         if ch == 27:  # ESC
             raise SystemExit(0)
+        if ch in (ord("p"), ord("P")):
+            # Pause: freeze the ball and wait for P to resume.
+            center_text(stdscr, 1, ">>> PAUSED <<<   (P to resume)", curses.A_BOLD)
+            stdscr.refresh()
+            stdscr.nodelay(False)
+            while True:
+                pch = stdscr.getch()
+                if pch in (ord("p"), ord("P")):
+                    break
+                if pch == 27:
+                    raise SystemExit(0)
+            stdscr.nodelay(True)
+            # Reset the step timer so the ball doesn't jump after unpausing.
+            last_step = time.time()
 
         time.sleep(0.005)
 
