@@ -318,23 +318,17 @@ def difficulty_menu(stdscr, high_score):
     """Show the title + difficulty menu. Returns the chosen goal (peg count)."""
     selected = 1  # default to Normal
 
-    # Enable mouse clicks AND hover/motion reporting if the terminal supports it.
+    # Enable mouse clicks. (We deliberately skip motion-reporting escape codes
+    # because some terminals send them back to us as raw bytes that look like
+    # ESC, which would kick the player out of the menu.)
     try:
-        curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
+        curses.mousemask(curses.ALL_MOUSE_EVENTS)
     except (AttributeError, curses.error):
-        pass
-    # Some terminals (incl. macOS Terminal) need this extra escape sequence to
-    # report mouse motion, not just clicks. Harmless if unsupported.
-    try:
-        import os
-        os.write(1, b"\033[?1003h\033[?1006h")
-    except OSError:
         pass
 
     stdscr.nodelay(False)
 
-    try:
-        while True:
+    while True:
             stdscr.erase()
             h, w = stdscr.getmaxyx()
             draw_lock(stdscr, h, w)
@@ -402,13 +396,6 @@ def difficulty_menu(stdscr, high_score):
                         ):
                             return DIFFICULTIES[idx][1]
                         break
-    finally:
-        # Turn off the extra mouse motion reporting when leaving the menu.
-        try:
-            import os
-            os.write(1, b"\033[?1003l\033[?1006l")
-        except OSError:
-            pass
 
 
 def win_screen(stdscr, goal, high_score):
