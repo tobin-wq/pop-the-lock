@@ -152,9 +152,10 @@ RING_POINTS = 90  # number of stops the ball can sit on
 # Multi-character sprites taken from the lock art itself.
 # Spaces in a sprite line are treated as "transparent" (lock shows through).
 BALL_SPRITE = [
-    " ...... ",
-    "........",
-    " ....... ",
+    " %%%%% ",
+    "%%%%%%%",
+    "%%%%%%%",
+    " %%%%% ",
 ]
 
 PEG_SPRITE = [
