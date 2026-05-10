@@ -437,12 +437,6 @@ def win_screen(stdscr, goal, high_score):
         stdscr.erase()
         h, w = stdscr.getmaxyx()
         draw_lock(stdscr, h, w, open_lock_lines())
-        center_text(
-            stdscr,
-            1,
-            f"*** YOU WIN! ALL {goal} PEGS LOCKED! ***",
-            curses.A_BOLD,
-        )
         center_text(stdscr, h - 3, f"High Score: {high_score}")
         center_text(stdscr, h - 2, "SPACE = play again   ESC = quit", curses.A_BOLD)
         stdscr.refresh()
