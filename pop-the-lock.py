@@ -307,30 +307,122 @@ def center_text(stdscr, row, text, attr=0):
         pass
 
 
-def title_screen(stdscr, high_score):
+DIFFICULTIES = [
+    ("Easy", 15),
+    ("Normal", 30),
+    ("Hard", 50),
+]
+
+
+def difficulty_menu(stdscr, high_score):
+    """Show the title + difficulty menu. Returns the chosen goal (peg count)."""
+    selected = 1  # default to Normal
+
+    # Enable mouse clicks AND hover/motion reporting if the terminal supports it.
+    try:
+        curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
+    except (AttributeError, curses.error):
+        pass
+    # Some terminals (incl. macOS Terminal) need this extra escape sequence to
+    # report mouse motion, not just clicks. Harmless if unsupported.
+    try:
+        import os
+        os.write(1, b"\033[?1003h\033[?1006h")
+    except OSError:
+        pass
+
+    stdscr.nodelay(False)
+
+    try:
+        while True:
+            stdscr.erase()
+            h, w = stdscr.getmaxyx()
+            draw_lock(stdscr, h, w)
+            center_text(stdscr, 1, "*** POP THE LOCK ***", curses.A_BOLD)
+            center_text(stdscr, 3, "Choose a difficulty", curses.A_BOLD)
+
+            # Lay out the three options vertically, centered.
+            base_row = h // 2 - 2
+            option_boxes = []  # (row, x_start, x_end_inclusive, index)
+            for i, (name, goal) in enumerate(DIFFICULTIES):
+                row = base_row + i * 2
+                if i == selected:
+                    # Hovered version is "bigger": spaced uppercase + arrows
+                    # + bold/reverse, which makes it visibly wider.
+                    spaced = " ".join(name.upper())
+                    text = f">>  {spaced}   ({goal} LEVELS)  <<"
+                    attr = curses.A_BOLD | curses.A_REVERSE
+                else:
+                    text = f"   {name}  ({goal} levels)   "
+                    attr = curses.A_BOLD
+                x = max(0, (w - len(text)) // 2)
+                try:
+                    stdscr.addnstr(row, x, text, w - 1, attr)
+                except curses.error:
+                    pass
+                option_boxes.append((row, x, x + len(text) - 1, i))
+
+            center_text(stdscr, h - 4, f"High Score: {high_score}")
+            center_text(
+                stdscr,
+                h - 3,
+                "Hover with mouse or use UP/DOWN arrows",
+            )
+            center_text(
+                stdscr,
+                h - 2,
+                "Click or press ENTER to start   ESC = quit",
+                curses.A_BOLD,
+            )
+            stdscr.refresh()
+
+            ch = stdscr.getch()
+            if ch == curses.KEY_UP:
+                selected = (selected - 1) % len(DIFFICULTIES)
+            elif ch == curses.KEY_DOWN:
+                selected = (selected + 1) % len(DIFFICULTIES)
+            elif ch in (10, 13, curses.KEY_ENTER, ord(" ")):
+                return DIFFICULTIES[selected][1]
+            elif ch == 27:  # ESC
+                raise SystemExit(0)
+            elif ch == curses.KEY_MOUSE:
+                try:
+                    _, mx, my, _, bstate = curses.getmouse()
+                except curses.error:
+                    continue
+                # Update hover based on mouse position.
+                for row, xs, xe, idx in option_boxes:
+                    if my == row and xs <= mx <= xe:
+                        selected = idx
+                        # If the user clicked, start that mode.
+                        if bstate & (
+                            curses.BUTTON1_CLICKED
+                            | curses.BUTTON1_PRESSED
+                            | curses.BUTTON1_RELEASED
+                        ):
+                            return DIFFICULTIES[idx][1]
+                        break
+    finally:
+        # Turn off the extra mouse motion reporting when leaving the menu.
+        try:
+            import os
+            os.write(1, b"\033[?1003l\033[?1006l")
+        except OSError:
+            pass
+
+
+def win_screen(stdscr, goal, high_score):
     stdscr.nodelay(False)
     while True:
         stdscr.erase()
         h, w = stdscr.getmaxyx()
         draw_lock(stdscr, h, w)
-        center_text(stdscr, 1, "*** POP THE LOCK ***", curses.A_BOLD)
-        center_text(stdscr, h - 3, f"High Score: {high_score}")
-        center_text(stdscr, h - 2, "Press SPACE to start   (ESC to quit)", curses.A_BOLD)
-        stdscr.refresh()
-        ch = stdscr.getch()
-        if ch == ord(" "):
-            return
-        if ch == 27:  # ESC
-            raise SystemExit(0)
-
-
-def win_screen(stdscr, high_score):
-    stdscr.nodelay(False)
-    while True:
-        stdscr.erase()
-        h, w = stdscr.getmaxyx()
-        draw_lock(stdscr, h, w)
-        center_text(stdscr, 1, "*** YOU WIN! ALL 50 PEGS LOCKED! ***", curses.A_BOLD)
+        center_text(
+            stdscr,
+            1,
+            f"*** YOU WIN! ALL {goal} PEGS LOCKED! ***",
+            curses.A_BOLD,
+        )
         center_text(stdscr, h - 3, f"High Score: {high_score}")
         center_text(stdscr, h - 2, "SPACE = play again   ESC = quit", curses.A_BOLD)
         stdscr.refresh()
@@ -474,10 +566,10 @@ def main(stdscr):
     high_score = load_high_score()
 
     while True:
-        title_screen(stdscr, high_score)
+        goal = difficulty_menu(stdscr, high_score)
 
         level = 1
-        pegs_remaining = GOAL  # countdown shown in the middle of the lock
+        pegs_remaining = goal  # countdown shown in the middle of the lock
         direction = 1  # start going right (clockwise)
         ball_idx = 0  # ball starts on the right side; persists between pegs
 
@@ -488,11 +580,11 @@ def main(stdscr):
             if hit:
                 pegs_remaining -= 1
                 if pegs_remaining == 0:
-                    # All 50 pegs locked — you win!
+                    # All pegs locked — you win!
                     if level > high_score:
                         high_score = level
                         save_high_score(high_score)
-                    win_screen(stdscr, high_score)
+                    win_screen(stdscr, goal, high_score)
                     break
                 level += 1
                 # Ball stays where it locked the peg; reverse direction and
