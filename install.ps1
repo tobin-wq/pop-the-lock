@@ -28,8 +28,10 @@ Write-Host "Installing Pop the Lock..."
 Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 # Python on Windows does not ship the `curses` module - install windows-curses
-# the first time if it is missing.
-& $python -c "import curses" 2>$null
+# the first time if it is missing. Suppress stderr at the OS level via cmd.exe
+# so PowerShell's "Stop" preference doesn't promote a Python traceback into a
+# terminating NativeCommandError.
+& cmd.exe /c "$python -c ""import curses"" 2>nul"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Installing windows-curses..."
     & $python -m pip install --quiet windows-curses
