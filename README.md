@@ -18,3 +18,13 @@ For PowerShell or Windows Terminal paste into a PowerShell window or Windows Ter
 irm https://raw.githubusercontent.com/tobin-wq/pop-the-lock/main/install.ps1 | iex
 ```
 Command Prompt, PowerShell, and Windows Terminal will all be able to run the command, but Windows Terminal will work the best.
+
+---
+**About**
+
+Pop the Lock is a fast-paced timing game where the goal is to stop the rotating indicator inside the target zone before it spins past. Land the hit and the lock advances to the next level. Each level is harder than the last. This is a terminal-based recreation of the original game by Bay Tek Entertainment.
+Press SPACE to lock, P to pause, and ESC to escape the pop the lock window.
+ 
+**Author**
+
+Made by Tobin Maymin who is an 11-year-old developer learning Python, game logic, and cross-platform tools.
