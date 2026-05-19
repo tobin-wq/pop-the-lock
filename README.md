@@ -27,4 +27,4 @@ Press SPACE to lock, P to pause, and ESC to escape the pop the lock window.
  
 **Author**
 
-Made by Tobin Maymin who is an 11-year-old developer learning Python, game logic, and cross-platform tools.
+Made by Tobin Maymin who is an 11-year-old developer who uses AI to help make apps. He's currently building his portfolio.
